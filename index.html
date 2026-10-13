@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDITH HUD V1</title>
+<title>NOVA HUD V1</title>
 <style>
 :root {
   --cyan: #55d9ff;
@@ -104,7 +104,7 @@ footer { margin-top: 18px; color: #6596af; font-size: .7rem; letter-spacing: .1e
 <div class="app">
 <header>
   <div>
-    <h1>EDITH</h1>
+    <h1>NOVA</h1>
     <div class="subtitle">STAY FOCUSED. STAY AHEAD.</div>
   </div>
   <div class="status">● SYSTEM ONLINE</div>
@@ -131,7 +131,7 @@ footer { margin-top: 18px; color: #6596af; font-size: .7rem; letter-spacing: .1e
       <div id="time">--:--:--</div>
       <div id="date">Loading...</div>
     </div>
-    <p class="label">EDITH INTERFACE // V1.0</p>
+    <p class="label">NOVA INTERFACE // V1.0</p>
   </section>
 
   <section class="panel">
@@ -161,7 +161,7 @@ footer { margin-top: 18px; color: #6596af; font-size: .7rem; letter-spacing: .1e
     <button id="mic" aria-label="Start voice assistant">🎙️</button>
   </section>
 </main>
-<footer>EDITH HUD PROTOTYPE // NOT CONNECTED TO HARDWARE</footer>
+<footer>NOVA HUD PROTOTYPE // NOT CONNECTED TO HARDWARE</footer>
 </div>
 <div id="toast" role="status"></div>
 
@@ -261,8 +261,8 @@ function answerCommand(text) {
       " demo notifications.";
   }
 
-  if (command.includes("hello") || command.includes("hey edith")) {
-    return "Hello. EDITH prototype is online.";
+  if (command.includes("hello") || command.includes("hey NOVA")) {
+    return "Hello EJ. NOVA is online.";
   }
 
   return "I heard: " + text +
@@ -285,8 +285,8 @@ mic.addEventListener("click", () => {
     mic.classList.add("listening");
     recognition.start();
   } catch (error) {
-    assistantStatus.textContent = "READY WHEN YOU ARE.";
-    reply.textContent = "Wait a moment, then try the microphone again.";
+    assistantStatus.textContent = "READY WHEN YOU ARE EJ.";
+    reply.textContent = "Hold up, then try the microphone again.";
     mic.classList.remove("listening");
   }
 });
