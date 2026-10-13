@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDITH HUD V1</title>
+<style>
+:root {
+  --cyan: #55d9ff;
+  --blue: #159cff;
+  --panel: rgba(3,22,39,.88);
+  --muted: #8bcfe9;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 20px;
+  color: #dff8ff;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(ellipse at center,#0b304a,#020711 75%);
+}
+.app { max-width: 1050px; margin: auto; }
+header {
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; margin-bottom: 22px;
+}
+h1 {
+  color: var(--cyan); letter-spacing: .25em;
+  margin: 0; font-size: 2rem;
+  text-shadow: 0 0 15px #159cff;
+}
+.subtitle { color: var(--muted); font-size: .7rem; letter-spacing: .15em; margin-top: 5px; }
+.status { color: #54ffbc; font-size: .75rem; }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 15px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid #36bfff;
+  padding: 18px;
+  box-shadow: 0 0 15px #087bff30, inset 0 0 18px #087bff10;
+  clip-path: polygon(0 12px,12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px));
+}
+.panel h2 {
+  color: var(--cyan); font-size: .8rem;
+  letter-spacing: .14em; margin: 0 0 18px;
+}
+.clock { text-align: center; display: grid; place-items: center; min-height: 290px; }
+.ring {
+  width: 210px; height: 210px; max-width: 100%;
+  border: 1px solid var(--cyan); outline: 1px dashed #36bfff80;
+  outline-offset: 7px; border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-shadow: 0 0 25px #159cff30, inset 0 0 25px #159cff20;
+}
+#time { font-size: clamp(2rem,5vw,2.8rem); color: var(--cyan); }
+#date { color: var(--muted); margin-top: 10px; }
+.label { color: var(--muted); font-size: .75rem; }
+.battery-number { font-size: 1.8rem; color: var(--cyan); }
+.battery-shell { height: 13px; border: 1px solid var(--cyan); padding: 2px; margin: 15px 0; }
+#batteryFill { height: 100%; width: 78%; background: linear-gradient(90deg,#087bff,#65eaff); }
+button {
+  cursor: pointer; color: #dff8ff;
+  background: #06304b; border: 1px solid #36bfff;
+  padding: 10px; font: inherit;
+}
+button:hover { background: #07547d; box-shadow: 0 0 12px #159cff80; }
+.tiny { font-size: .7rem; }
+.notification { border-top: 1px solid #36bfff55; padding: 12px 0; }
+.notification button { width: 100%; text-align: left; background: transparent; border: 0; }
+.notification button:hover { color: var(--cyan); box-shadow: none; }
+.notification small { color: var(--muted); display: block; margin-top: 6px; }
+.assistant { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+#assistantStatus { color: var(--cyan); margin-bottom: 8px; }
+#reply { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+#mic { border-radius: 50%; width: 75px; height: 75px; font-size: 1.8rem; flex-shrink: 0; }
+#mic.listening { box-shadow: 0 0 25px #55d9ff; }
+footer { margin-top: 18px; color: #6596af; font-size: .7rem; letter-spacing: .1em; }
+#toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%); background: #061b2a;
+  color: var(--cyan); border: 1px solid var(--cyan);
+  padding: 12px 16px; display: none; max-width: 90%;
+}
+@media(max-width:800px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+  .clock { grid-column: 1 / -1; grid-row: 1; }
+  .assistant { grid-column: 1 / -1; }
+}
+@media(max-width:520px) {
+  .grid { grid-template-columns: 1fr; }
+  .clock,.assistant { grid-column: auto; }
+  .clock { grid-row: auto; }
+  header { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <h1>EDITH</h1>
+    <div class="subtitle">STAY FOCUSED. STAY AHEAD.</div>
+  </div>
+  <div class="status">● SYSTEM ONLINE</div>
+</header>
+
+<main class="grid">
+  <section class="panel">
+    <h2>POWER STATUS</h2>
+    <div class="label">SIMULATED BATTERY</div>
+    <div class="battery-number" id="batteryText">78%</div>
+    <div class="battery-shell"><div id="batteryFill"></div></div>
+    <p class="label" id="batteryHint">Demo battery level</p>
+    <button class="tiny" id="batteryButton">CYCLE BATTERY LEVEL</button>
+    <br><br>
+    <h2>SYSTEM DIAGNOSTICS</h2>
+    <p class="label">DISPLAY <span style="float:right;color:#54ffbc">READY</span></p>
+    <p class="label">VOICE <span id="voiceReady" style="float:right">CHECKING</span></p>
+    <p class="label">INTERNET <span style="float:right;color:#54ffbc">NOT REQUIRED</span></p>
+  </section>
+
+  <section class="panel clock">
+    <h2>LOCAL TIME</h2>
+    <div class="ring">
+      <div id="time">--:--:--</div>
+      <div id="date">Loading...</div>
+    </div>
+    <p class="label">EDITH INTERFACE // V1.0</p>
+  </section>
+
+  <section class="panel">
+    <h2>NOTIFICATIONS <span id="count">02</span></h2>
+    <div class="notification">
+      <button class="notice" data-title="Message from Mom" data-body="See you after school!">
+        ▣ &nbsp; Message from Mom
+        <small>See you after school!</small>
+      </button>
+    </div>
+    <div class="notification">
+      <button class="notice" data-title="Next class" data-body="Biology — Room 204 at 11:00 AM.">
+        ▦ &nbsp; Next class
+        <small>Biology — Room 204</small>
+      </button>
+    </div>
+    <button class="tiny" id="clear">CLEAR NOTIFICATIONS</button>
+    <p class="label">Tap a notification for details.</p>
+  </section>
+
+  <section class="panel assistant">
+    <div>
+      <h2>VOICE ASSISTANT</h2>
+      <div id="assistantStatus">READY WHEN YOU ARE.</div>
+      <div id="reply">Press the microphone and say “What time is it?” or “Battery status.”</div>
+    </div>
+    <button id="mic" aria-label="Start voice assistant">🎙️</button>
+  </section>
+</main>
+<footer>EDITH HUD PROTOTYPE // NOT CONNECTED TO HARDWARE</footer>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+// LIVE CLOCK
+function updateClock() {
+  const now = new Date();
+  document.getElementById("time").textContent =
+    now.toLocaleTimeString([], {
+      hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
+  document.getElementById("date").textContent =
+    now.toLocaleDateString([], {
+      weekday: "short", month: "short", day: "numeric"
+    });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// TEMPORARY DEMO BATTERY
+const levels = [78, 62, 41, 95, 18];
+let batteryIndex = 0;
+
+document.getElementById("batteryButton").addEventListener("click", () => {
+  batteryIndex = (batteryIndex + 1) % levels.length;
+  const level = levels[batteryIndex];
+  document.getElementById("batteryText").textContent = level + "%";
+  document.getElementById("batteryFill").style.width = level + "%";
+  document.getElementById("batteryHint").textContent =
+    level <= 20 ? "LOW POWER — demo alert" : "Demo battery level";
+  toast("Demo battery set to " + level + "%");
+});
+
+// TOAST POPUP
+let toastTimer;
+function toast(message) {
+  const box = document.getElementById("toast");
+  box.textContent = message;
+  box.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => box.style.display = "none", 3200);
+}
+
+// CLICKABLE NOTIFICATIONS
+const notices = [...document.querySelectorAll(".notice")];
+
+notices.forEach(button => {
+  button.addEventListener("click", () => {
+    toast(button.dataset.title + ": " + button.dataset.body);
+  });
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  notices.forEach(button => button.closest(".notification").style.display = "none");
+  document.getElementById("count").textContent = "00";
+  toast("Demo notifications cleared.");
+});
+
+// VOICE ASSISTANT
+const mic = document.getElementById("mic");
+const assistantStatus = document.getElementById("assistantStatus");
+const reply = document.getElementById("reply");
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  document.getElementById("voiceReady").textContent = "AVAILABLE";
+} else {
+  document.getElementById("voiceReady").textContent = "UNAVAILABLE";
+  document.getElementById("voiceReady").style.color = "#ffd166";
+}
+
+function answerCommand(text) {
+  const command = text.toLowerCase();
+
+  if (command.includes("time")) {
+    return "The time is " +
+      new Date().toLocaleTimeString([], {
+        hour: "numeric", minute: "2-digit"
+      }) + ".";
+  }
+
+  if (command.includes("battery") || command.includes("power")) {
+    return "Demo battery level is " +
+      document.getElementById("batteryText").textContent +
+      ". This value is simulated.";
+  }
+
+  if (command.includes("notification") || command.includes("message")) {
+    return "You have " +
+      document.getElementById("count").textContent +
+      " demo notifications.";
+  }
+
+  if (command.includes("hello") || command.includes("hey edith")) {
+    return "Hello. EDITH prototype is online.";
+  }
+
+  return "I heard: " + text +
+    ". I only understand a few demo commands right now.";
+}
+
+mic.addEventListener("click", () => {
+  if (!recognition) {
+    assistantStatus.textContent = "VOICE INPUT UNAVAILABLE";
+    reply.textContent =
+      "This browser does not support speech recognition here. " +
+      "You can still test the clock, notifications, and battery controls.";
+    toast("Speech recognition is not supported.");
+    return;
+  }
+
+  try {
+    assistantStatus.textContent = "LISTENING...";
+    reply.textContent = "Speak now. Try “What time is it?”";
+    mic.classList.add("listening");
+    recognition.start();
+  } catch (error) {
+    assistantStatus.textContent = "READY WHEN YOU ARE.";
+    reply.textContent = "Wait a moment, then try the microphone again.";
+    mic.classList.remove("listening");
+  }
+});
+
+if (recognition) {
+  recognition.onresult = event => {
+    const transcript = event.results[0][0].transcript;
+    assistantStatus.textContent = "COMMAND RECEIVED";
+    reply.textContent = answerCommand(transcript);
+  };
+
+  recognition.onerror = event => {
+    assistantStatus.textContent = "VOICE INPUT ISSUE";
+    reply.textContent = event.error === "not-allowed"
+      ? "Microphone permission was blocked. Allow access in browser settings."
+      : "Speech could not be captured (" + event.error + "). Try again.";
+  };
+
+  recognition.onend = () => mic.classList.remove("listening");
+}
+</script>
+</body>
+</html>
